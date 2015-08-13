@@ -30,12 +30,7 @@
 #include <mbed.h>
 #include "i2cdef.h"
 
-#define SLAVE_ADDR 0x55
-
-void i2c_addressed_for_write ( );
-void i2c_byte_received ( uint8_t data );
-void i2c_byte_requested ( bool isStart );
-void i2c_stop_received ( );
+enum : uint32_t { SLAVE_ADDRESS = 0x55 };
 
 DigitalOut activityLed(LED1);
 DigitalOut errorLed(LED2);
@@ -177,13 +172,11 @@ private:
     void DelayCurrentHoldMillis ( );
 
     int state;              // bitwise OR of STATE values
-    uint32_t address;       // current EEPROM address
     Crc16 checksum;         // current checksum
+    uint8_t address;        // current EEPROM address
     uint8_t countdown;      // counts down number of bytes until special operation
     bool isFirstByte;
-
-    // provide 256 bytes of storage in our virtual eeprom
-    uint8_t storage[256];
+    uint8_t storage[256];   // provide 256 bytes of storage in our virtual eeprom
 };
 
 void FatalError ()
@@ -206,7 +199,7 @@ void BlinkDelay ( uint32_t Milliseconds )
 
     int end = timer.read_ms() + Milliseconds;
     int nextToggle = 0;
-    uint8_t i = 0;
+    uint32_t i = 0;
 
     int now;
     while ((now = timer.read_ms()) < end) {
@@ -368,7 +361,7 @@ void I2cTester::ByteReceived ( uint8_t data )
 {
     if (this->state & STATE_NAK_WRITE) {
         // count down until it's time to NAK.
-        // zero-length NAK would have been handled in i2c_addressed_for_write
+        // zero-length NAK would have been handled in AddressedForWrite
         if (--(this->countdown) == 0) {
             // NAKing here means the next byte that the master sends will
             // be NAKed.
@@ -492,7 +485,7 @@ I2cTester i2cTester;
 
 int main ()
 {
-    i2cTester.Init(SLAVE_ADDR);
+    i2cTester.Init(SLAVE_ADDRESS);
     for (;;) i2cTester.RunStateMachine();
     return 0;
 }

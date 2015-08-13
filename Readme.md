@@ -1,4 +1,4 @@
-##Tester for Windows Low Level Devices APIs
+﻿##Tester for Windows Low Level Devices APIs
 
 This repository contains firmware source code for the MBED LPC1768 that
 enables functional testing of the Windows low level devices APIs,
@@ -84,7 +84,7 @@ describes the behavior of these registers.
 <tr>
   <td>0xFB</td>
   <td>HOLD_READ_CONTROL</td>
-  <td>Controls how many bytes of the next read the slave will transmit before pulling SCL low for the duration specified in SCL_HOLD_MILLIS_HI/LO. Writing a value other than 0xFF to this register arms hold read mode, where the register value is the number of bytes the slave will transmit before pulling SCL low. Writing a value of 0 will cause SCL to be pulled low immediately after the address byte is received. The device transmits sequentially increasing data in hold read mode (0, 1, 2, 3 â€¦). Hold read is a one-shot operation. After the next read operation, hold read mode is cleared and this register resets to 0xFF. Values: <br> 0x0 - 0xFE - hold read mode is armed for the next read<br>0xFF - hold read mode is not armed</td>
+  <td>Controls how many bytes of the next read the slave will transmit before pulling SCL low for the duration specified in SCL_HOLD_MILLIS_HI/LO. Writing a value other than 0xFF to this register arms hold read mode, where the register value is the number of bytes the slave will transmit before pulling SCL low. Writing a value of 0 will cause SCL to be pulled low immediately after the address byte is received. The device transmits sequentially increasing data in hold read mode (0, 1, 2, 3 ...). Hold read is a one-shot operation. After the next read operation, hold read mode is cleared and this register resets to 0xFF. Values: <br> 0x0 - 0xFE - hold read mode is armed for the next read<br>0xFF - hold read mode is not armed</td>
   <td>0xFF</td>
 </tr>
 <tr>
