@@ -5,7 +5,7 @@ enables functional testing of the Windows low level devices APIs,
 including Windows.Devices.I2c. Binary firmware images are included in the HLK
 that can be copied to the MBED. This is the source code for that firmware.
 
-###Build the code
+###Building the code
 
  1. Clone this repository
  
@@ -52,14 +52,14 @@ that can be copied to the MBED. This is the source code for that firmware.
 
         nmake
 
- 1. Copy `busses-tester.bin` to your MBED and hit the RESET button.
+ 1. Copy `busses-tester-mbed_LPC1768.bin` to your MBED and hit the RESET button.
  
 The mbed is now running the firmware and is ready for the HLK.
 
 ### I2C Test Device Protocol
 
 This section documents the protocol expected by the Windows.Devices.I2c
-extended functional tests. This protocol is implemented by the busses-tester.
+advanced functional tests. This protocol is implemented by the busses-tester.
 
 The I2C test device has a register address space of 256 bytes. Some registers have
 special functions that control the behavior of the device. The following table 
@@ -107,19 +107,19 @@ describes the behavior of these registers.
 <tr>
   <td>0xFB</td>
   <td>HOLD_READ_CONTROL</td>
-  <td>Controls how many bytes of the next read the slave will transmit before pulling SCL low for the duration specified in SCL_HOLD_MILLIS_HI/LO. Writing a value other than 0xFF to this register arms hold read mode, where the register value is the number of bytes the slave will transmit before pulling SCL low. Writing a value of 0 will cause SCL to be pulled low immediately after the address byte is received. The device transmits sequentially increasing data in hold read mode (0, 1, 2, 3 ...). Hold read is a one-shot operation. After the next read operation, hold read mode is cleared and this register resets to 0xFF. Values: <br> 0x0 - 0xFE - hold read mode is armed for the next read<br>0xFF - hold read mode is not armed</td>
+  <td>Specifies how many bytes of the next read the slave will transmit before pulling SCL low for the duration specified in SCL_HOLD_MILLIS_HI/LO. Writing a value other than 0xFF to this register arms hold read mode, where the register value is the number of bytes the slave will transmit before pulling SCL low. Writing a value of 0 will cause SCL to be pulled low immediately after the address byte is received. Hold read is a one-shot operation. After the next read operation, hold read mode is cleared and this register resets to 0xFF. Values: <br> 0x0 - 0xFE - hold read mode is armed for the next read<br>0xFF - hold read mode is not armed</td>
   <td>0xFF</td>
 </tr>
 <tr>
   <td>0xFC</td>
   <td>HOLD_WRITE_CONTROL</td>
-  <td>Controls how many bytes of the next write the slave will ACK before pulling SCL low for the duration specified in SCL_HOLD_MILLIS_HI/LO. Writing a value other than 0xFF to this register arms hold write mode, where the register value is the number of bytes the slave will receive before pulling SCL low. Writing a value of 0 will cause SCL to be pulled low immediately after the address byte is received. Data transmitted by the master is ignored in hold write mode. Hold write is a one-shot operation. After the next write operation, hold write mode is cleared and this register resets to 0xFF. Values: <br> 0x0 - 0xFE - hold write mode is armed for the next write<br>0xFF - hold write mode is not armed</td>
+  <td>Specifies how many bytes of the next write the slave will ACK before pulling SCL low for the duration specified in SCL_HOLD_MILLIS_HI/LO. Writing a value other than 0xFF to this register arms hold write mode, where the register value is the number of bytes the slave will receive before pulling SCL low. Writing a value of 0 will cause SCL to be pulled low immediately after the address byte is received. Data transmitted by the master is ignored in hold write mode. Hold write is a one-shot operation. After the next write operation, hold write mode is cleared and this register resets to 0xFF. Values: <br> 0x0 - 0xFE - hold write mode is armed for the next write<br>0xFF - hold write mode is not armed</td>
   <td>0xFF</td>
 </tr>
 <tr>
   <td>0xFD</td>
   <td>NAK_CONTROL</td>
-  <td>Controls how many bytes of the next write operation the slave will ACK before generating a NAK. Writing a value other than 0xFF to this register arms NAK mode, where the value written is the number of bytes the slave will ACK before NAKing a received byte. Data transmitted by the master is ignored in NAK mode. NAK mode is a one-shot operation. After the next write operation, NAK mode is cleared and this register resets to 0xFF. Values: <br>0x0 - 0xFE - The next write will be NAK'd after the number of bytes specified in this register <br>0xFF - NAK mode not armed</td>
+  <td>Specifies how many bytes of the next write operation the slave will ACK before generating a NAK. Writing a value other than 0xFF to this register arms NAK mode, where the value written is the number of bytes the slave will ACK before NAKing a received byte. Data transmitted by the master is ignored in NAK mode. NAK mode is a one-shot operation. After the next write operation, NAK mode is cleared and this register resets to 0xFF. Values: <br>0x0 - 0xFE - The next write will be NAK'd after the number of bytes specified in this register <br>0xFF - NAK mode not armed</td>
   <td>0xFF</td>
 </tr>
 <tr>
