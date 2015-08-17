@@ -7,31 +7,54 @@ that can be copied to the MBED. This is the source code for that firmware.
 
 ###Build the code
 
- 1. Download and install [GCC ARM Embedded](https://launchpad.net/gcc-arm-embedded).
-    Choose the .exe installer in the list of downloads.
-
- 1. Clone the [ms-iot/mbed-windows](https://github.com/ms-iot/mbed-windows.git)
-    repository:
-    
-        git clone https://github.com/ms-iot/mbed-windows.git
-    
- 1. Clone this repository to the same parent directory as mbed-windows.
+ 1. Clone this repository
  
         git clone https://github.com/ms-iot/busses-tester.git
-        
- 1. Put the compilers and tools on your path
 
-        cd mbed-windows
+ 1. Download and install [GCC ARM Embedded](https://launchpad.net/gcc-arm-embedded).
+    Choose the .exe installer from the list of downloads.
+
+ 1. Obtain nmake.exe by installing [Visual Studio](https://www.visualstudio.com/).
+ 
+ 1. Sign up for an account at [mbed.org](https://developer.mbed.org/)
+ 
+ 1. Launch the [online compiler](https://developer.mbed.org/compiler/) and
+    go to New -> New Program ...
+    
+    ![New -> New Program](assets/mbed-new-program.png)
+    
+ 1. Ensure that Platform is set to `mbed LPC1768` and click OK.
+ 
+    ![New Program Dialog](assets/mbed-new-program-dialog.png)
+    
+ 1. Right click on the newly created project in the Program Workspace pane, and
+    click `Export Program`.
+    
+    ![Export Program](assets/mbed-export-program.png)
+    
+ 1. Select `GCC (ARM Embedded)` as the Export Toolchain and click Export.
+ 
+    ![Export Toolchain](assets/mbed-export-toolchain.png)
+ 
+ 1. A zip file containing the source files and mbed library will be downloaded
+    to your computer. Extract the zip file and copy the `mbed` directory
+    to this repository.
+    
+    ![Directory Structure](assets/directory-structure.png)
+        
+ 1. Back in command prompt, put the compilers and tools on your path by 
+    navigating to this repository and running the `setenv.cmd` script:
+
+        cd busses-tester
         setenv.cmd
         
- 1. CD to this repository and build
+ 1. Run nmake to build the executable image
 
-        cd ../busses-tester
         nmake
 
  1. Copy `busses-tester.bin` to your MBED and hit the RESET button.
  
-The MBED is now running the firmware and is ready for the HLK.
+The mbed is now running the firmware and is ready for the HLK.
 
 ### I2C Test Device Protocol
 
