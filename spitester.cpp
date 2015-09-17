@@ -180,11 +180,6 @@ ClockMeasurementStatus SpiTester::WaitForCapture (uint32_t* Capture)
 
 TransferInfo SpiTester::CaptureTransfer (const CommandBlock& Command)
 {
-    // printf(
-        // "Validating data with Mode = %d, DataBitLength = %d\n\r",
-        // Command.u.CaptureNextTransfer.Mode,
-        // Command.u.CaptureNextTransfer.DataBitLength);
-
     auto transferInfo = TransferInfo();
 
     uint32_t checksum = 0;
@@ -237,10 +232,6 @@ TransferInfo SpiTester::CaptureTransfer (const CommandBlock& Command)
                 mismatchDetected = true;
                 transferInfo.MismatchIndex =
                     rxValue - Command.u.CaptureNextTransfer.SendValue;
-                // printf(
-                    // "Mismatch detected! (rxValue = %d, data = 0x%x)\n\r",
-                    // rxValue,
-                    // data);
             }
             ++rxValue;
         } else if (!ChipSelectAsserted()) {
@@ -268,26 +259,14 @@ TransferInfo SpiTester::CaptureTransfer (const CommandBlock& Command)
             LPC_TIM2->TCR = TIM_TCR_RESET;
 
             transferInfo.ClockActiveTime = capture2 - capture1;
-            // printf(
-                // "Time measured successfully. capture = %lu, capture2 = %lu, activeTime = %lu, clockActiveTime = %lu\n\r",
-                // capture,
-                // capture2,
-                // activeTime,
-                // clockActiveTime);
         }
     }
-
-    // printf("data = 0x%x\n\r", data);
 
     transferInfo.Checksum = checksum;
     transferInfo.ElementCount = rxValue - Command.u.CaptureNextTransfer.SendValue;
     if (!mismatchDetected)
         transferInfo.MismatchIndex = transferInfo.ElementCount;
 
-    // printf(
-        // "transferInfo.ElementCount = %d, rxValue = %d\n\r",
-        // transferInfo.ElementCount,
-        // rxValue);
     SspSetDataMode(
         SPI_CONTROL_INTERFACE_MODE,
         SPI_CONTROL_INTERFACE_DATABITLENGTH);
@@ -332,7 +311,7 @@ void SpiTester::RunStateMachine ()
             SspSendWithChecksum(this->transferInfo);
             break;
         default:
-            // printf("Invalid command: 0x%x\n\r", command);
+            // invalid command
             break;
         }
     }

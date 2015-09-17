@@ -33,11 +33,11 @@ CLKPWR_PCLKSEL_CCLK_DIV GetPeripheralClockDivider (CLKPWR_PCLKSEL Peripheral)
 {
     uint32_t value;
 
-	if (Peripheral < 32) {
+    if (Peripheral < 32) {
         value = (LPC_SC->PCLKSEL0 >> Peripheral) & 0x3;
-	} else {
+    } else {
         value = (LPC_SC->PCLKSEL1 >> (Peripheral - 32)) & 0x3;
-	}
+    }
 
     return CLKPWR_PCLKSEL_CCLK_DIV(value);
 }
@@ -84,13 +84,13 @@ void SetDefaultTimer (LPC_TIM_TypeDef* Timer)
     SetPeripheralPowerState(pconp, true);
     SetPeripheralClockDivider(pclksel, CLKPWR_PCLKSEL_CCLK_DIV_4);
 
-	Timer->TCR = TIM_TCR_RESET;
-	Timer->CTCR = 0;			// timer mode
-	Timer->PR = SystemCoreClock / (4 * 1000000) - 1;		// 1us resolution
-	Timer->MCR = 0;
-	Timer->CCR = 0;
-	Timer->IR = 0x3f;			// clear interrupts
-	// take out of reset and enable for counting
+    Timer->TCR = TIM_TCR_RESET;
+    Timer->CTCR = 0;            // timer mode
+    Timer->PR = SystemCoreClock / (4 * 1000000) - 1;        // 1us resolution
+    Timer->MCR = 0;
+    Timer->CCR = 0;
+    Timer->IR = 0x3f;           // clear interrupts
+    // take out of reset and enable for counting
     Timer->TCR = TIM_TCR_ENABLE;
 }
 
@@ -102,12 +102,12 @@ uint32_t Micros ()
 void DelayMicros (uint32_t Micros)
 {
     uint32_t start = _defaultTimer->TC;
-	uint32_t end = start + Micros;
+    uint32_t end = start + Micros;
 
-	if(end < start) {		// overflow condition
-		while(_defaultTimer->TC >= start);
-		while(_defaultTimer->TC < end);
-	}  else {
-		while(_defaultTimer->TC < end && _defaultTimer->TC >= start);
-	}
+    if(end < start) {       // overflow condition
+        while(_defaultTimer->TC >= start);
+        while(_defaultTimer->TC < end);
+    }  else {
+        while(_defaultTimer->TC < end && _defaultTimer->TC >= start);
+    }
 }

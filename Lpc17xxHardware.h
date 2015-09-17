@@ -130,9 +130,9 @@ uint32_t GetPeripheralClockFrequency (CLKPWR_PCLKSEL Peripheral);
 // Timer Related Definitions
 //
 enum TIM_TCR : uint32_t {
-    TIM_TCR_ENABLE			= 1<<0,
-    TIM_TCR_RESET			= 1<<1,
-    TIM_TCR_BITMASK		    = 3,
+    TIM_TCR_ENABLE          = 1<<0,
+    TIM_TCR_RESET           = 1<<1,
+    TIM_TCR_BITMASK         = 3,
 };
 
 //
@@ -290,22 +290,22 @@ enum I2C_STAT : uint32_t {
 //
 enum SSP_CR0 : uint32_t {
     SSP_CR0_FRF_SPI         = 0<<4,
-    SSP_CR0_FRF_TI   		= 1<<4,
-    SSP_CR0_FRF_MICROWIRE  	= 2<<4,
-    SSP_CR0_CPOL_HI		    = 1<<6,
-    SSP_CR0_CPHA_SECOND	    = 1<<7,
-    SSP_CR0_BITMASK		    = 0xFFFF,
+    SSP_CR0_FRF_TI          = 1<<4,
+    SSP_CR0_FRF_MICROWIRE   = 2<<4,
+    SSP_CR0_CPOL_HI         = 1<<6,
+    SSP_CR0_CPHA_SECOND     = 1<<7,
+    SSP_CR0_BITMASK         = 0xFFFF,
 };
 
 //
 // SSP CR1 Register Bit Definitions
 //
 enum SSP_CR1 : uint32_t {
-    SSP_CR1_LBM_EN		 = 1<<0,
-    SSP_CR1_SSP_EN		 = 1<<1,
-    SSP_CR1_SLAVE_EN	 = 1<<2,
-    SSP_CR1_SO_DISABLE	 = 1<<3,
-    SSP_CR1_BITMASK		 = 0x0F,
+    SSP_CR1_LBM_EN       = 1<<0,
+    SSP_CR1_SSP_EN       = 1<<1,
+    SSP_CR1_SLAVE_EN     = 1<<2,
+    SSP_CR1_SO_DISABLE   = 1<<3,
+    SSP_CR1_BITMASK      = 0x0F,
 };
 
 //
@@ -317,17 +317,17 @@ enum SSP_SR : uint32_t {
     SSP_SR_RNE       = 1<<2,
     SSP_SR_RFF       = 1<<3,
     SSP_SR_BSY       = 1<<4,
-    SSP_SR_BITMASK	 = 0x1F,
+    SSP_SR_BITMASK   = 0x1F,
 };
 
 //
 // SSP IMSC Register Bit Definitions
 //
 enum SSP_IMSC : uint32_t {
-    SSP_IMSC_ROR	 = 1<<0,
-    SSP_IMSC_RT		 = 1<<1,
-    SSP_IMSC_RX		 = 1<<2,
-    SSP_IMSC_TX		 = 1<<3,
+    SSP_IMSC_ROR     = 1<<0,
+    SSP_IMSC_RT      = 1<<1,
+    SSP_IMSC_RX      = 1<<2,
+    SSP_IMSC_TX      = 1<<3,
     SSP_IMSC_BITMASK = 0x0F,
 };
 
@@ -335,40 +335,40 @@ enum SSP_IMSC : uint32_t {
 // SSP RIS Register Bit Definitions
 //
 enum SSP_RIS : uint32_t {
-    SSP_RIS_ROR		 = 1<<0,
-    SSP_RIS_RT		 = 1<<1,
-    SSP_RIS_RX		 = 1<<2,
-    SSP_RIS_TX		 = 1<<3,
-    SSP_RIS_BITMASK	 = 0x0F,
+    SSP_RIS_ROR      = 1<<0,
+    SSP_RIS_RT       = 1<<1,
+    SSP_RIS_RX       = 1<<2,
+    SSP_RIS_TX       = 1<<3,
+    SSP_RIS_BITMASK  = 0x0F,
 };
 
 //
 // SSP MIS Register Bit Definitions
 //
 enum SSP_MIS : uint32_t {
-    SSP_MIS_ROR		 = 1<<0,
-    SSP_MIS_RT		 = 1<<1,
-    SSP_MIS_RX		 = 1<<2,
-    SSP_MIS_TX		 = 1<<3,
-    SSP_MIS_BITMASK	 = 0x0F,
+    SSP_MIS_ROR      = 1<<0,
+    SSP_MIS_RT       = 1<<1,
+    SSP_MIS_RX       = 1<<2,
+    SSP_MIS_TX       = 1<<3,
+    SSP_MIS_BITMASK  = 0x0F,
 };
 
 //
 // SSP ICR Register Bit Definitions
 //
 enum SSP_ICR : uint32_t {
-    SSP_ICR_ROR		 = 1<<0,
-    SSP_ICR_RT		 = 1<<1,
-    SSP_ICR_BITMASK	 = 0x03,
+    SSP_ICR_ROR      = 1<<0,
+    SSP_ICR_RT       = 1<<1,
+    SSP_ICR_BITMASK  = 0x03,
 };
 
 //
 // SSP DMACR Register Bit Definitions
 //
 enum SSP_DMACR : uint32_t {
-    SSP_DMACR_RXDMA_EN  	 = 1<<0,
-    SSP_DMACR_TXDMA_EN  	 = 1<<1,
-    SSP_DMACR_BITMASK		 = 0x03,
+    SSP_DMACR_RXDMA_EN       = 1<<0,
+    SSP_DMACR_TXDMA_EN       = 1<<1,
+    SSP_DMACR_BITMASK        = 0x03,
 };
 
 constexpr inline uint32_t SSP_CR0_DSS (uint32_t DataBitLength)
