@@ -13,19 +13,19 @@
 
 namespace Lldt {
 namespace I2c {
-    
+
 enum {
     //
     // The slave address of the test device
     //
     SLAVE_ADDRESS = 0x55,
-    
+
     //
     // Version of the interface. Increment this when a breaking change is made
     // to the interface.
     //
     VERSION = 1,
-    
+
     NACK_INDEX_MAX = 0xFE,
     STRETCH_INDEX_MAX = 0xFE,
 };
@@ -43,7 +43,7 @@ enum REGISTERS {
     REG_CHECKSUM_RESET = 0xFF,
 };
 
-} // namespace I2c    
+} // namespace I2c
 namespace Spi {
 
 enum : uint32_t {
@@ -51,7 +51,7 @@ enum : uint32_t {
     // Device signature returned in DeviceId field of TesterInfo.
     //
     DEVICE_ID = 0x7B216A38,
-    
+
     //
     // Version of the interface. Increment this when a breaking change is made
     // to the interface.
@@ -107,7 +107,7 @@ struct TesterInfo {
     // Signature of the test device (DEVICE_ID).
     //
     uint32_t DeviceId;
-    
+
     //
     // Contains the interface version number that the tester was built against.
     //
@@ -159,7 +159,7 @@ struct TransferInfo {
     // Status code indicating if the clock active time was successfully measured.
     //
     ClockMeasurementStatus ClockActiveTimeStatus;
-    
+
     //
     // The number of ticks (in units of ClockMeasurementFrequency ticks per
     // second) between the first falling edge of SCK and the last falling

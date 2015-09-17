@@ -11,7 +11,7 @@ using namespace Lldt::I2c;
 // P1.18
 void ActLedInit ()
 {
-    LPC_GPIO1->FIODIR = 1 << 18;
+    LPC_GPIO1->FIODIR |= 1 << 18;
 }
 
 void ActLedOn ()
@@ -27,7 +27,7 @@ void ActLedOff ()
 // P1.20
 void ErrLedInit ()
 {
-    LPC_GPIO1->FIODIR = 1 << 20;
+    LPC_GPIO1->FIODIR |= 1 << 20;
 }
 
 void ErrLedOn ()
@@ -86,6 +86,9 @@ void I2cTester::DelayCurrentHoldMillis ( )
 //
 void I2cTester::Init ( )
 {
+    ActLedInit();
+    ErrLedInit();
+
     SetPeripheralPowerState(CLKPWR_PCONP_PCI2C1, true);
     SetPeripheralClockDivider(CLKPWR_PCLKSEL_I2C1, CLKPWR_PCLKSEL_CCLK_DIV_4);
 

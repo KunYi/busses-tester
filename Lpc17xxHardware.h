@@ -49,7 +49,7 @@ enum CLKPWR_PCLKSEL_CCLK_DIV : uint32_t {
 };
 
 
-enum CLKPWR_PCONP : uint32_t {    
+enum CLKPWR_PCONP : uint32_t {
     CLKPWR_PCONP_PCTIM0     = 1U<<1,
     CLKPWR_PCONP_PCTIM1     = 1U<<2,
     CLKPWR_PCONP_PCUART0    = 1U<<3,
@@ -80,7 +80,7 @@ enum CLKPWR_PCONP : uint32_t {
     CLKPWR_PCONP_BITMASK    = 0xEFEFF7DEU,
 };
 
-enum CLKPWR_CLKSRCSEL : uint32_t {   
+enum CLKPWR_CLKSRCSEL : uint32_t {
     CLKPWR_CLKSRCSEL_CLKSRC_IRC          = 0x00U,
     CLKPWR_CLKSRCSEL_CLKSRC_MAINOSC      = 0x01U,
     CLKPWR_CLKSRCSEL_CLKSRC_RTC          = 0x02U,
@@ -103,7 +103,7 @@ enum CLKPWR_PLL0CON : uint32_t {
     CLKPWR_PLL0CON_CONNECT      = 0x02U,
     CLKPWR_PLL0CON_BITMASK      = 0x03U,
 };
- 
+
 enum CLKPWR_PCON : uint32_t {
     CLKPWR_PCON_PM0         = 1U<<0,
     CLKPWR_PCON_PM1         = 1U<<1,
@@ -299,7 +299,7 @@ enum SSP_CR0 : uint32_t {
 
 //
 // SSP CR1 Register Bit Definitions
-// 
+//
 enum SSP_CR1 : uint32_t {
     SSP_CR1_LBM_EN		 = 1<<0,
     SSP_CR1_SSP_EN		 = 1<<1,
@@ -317,7 +317,7 @@ enum SSP_SR : uint32_t {
     SSP_SR_RNE       = 1<<2,
     SSP_SR_RFF       = 1<<3,
     SSP_SR_BSY       = 1<<4,
-    SSP_SR_BITMASK	 = 0x1F, 
+    SSP_SR_BITMASK	 = 0x1F,
 };
 
 //
@@ -359,7 +359,7 @@ enum SSP_MIS : uint32_t {
 enum SSP_ICR : uint32_t {
     SSP_ICR_ROR		 = 1<<0,
     SSP_ICR_RT		 = 1<<1,
-    SSP_ICR_BITMASK	 = 0x03,     
+    SSP_ICR_BITMASK	 = 0x03,
 };
 
 //
@@ -368,7 +368,7 @@ enum SSP_ICR : uint32_t {
 enum SSP_DMACR : uint32_t {
     SSP_DMACR_RXDMA_EN  	 = 1<<0,
     SSP_DMACR_TXDMA_EN  	 = 1<<1,
-    SSP_DMACR_BITMASK		 = 0x03,    
+    SSP_DMACR_BITMASK		 = 0x03,
 };
 
 constexpr inline uint32_t SSP_CR0_DSS (uint32_t DataBitLength)
@@ -376,7 +376,7 @@ constexpr inline uint32_t SSP_CR0_DSS (uint32_t DataBitLength)
     return (DataBitLength - 1) & 0xF;
 }
 
-constexpr inline uint32_t SSP_CR0_SCR (uint32_t Value) 
+constexpr inline uint32_t SSP_CR0_SCR (uint32_t Value)
 {
     return (Value & 0xFF) << 8;
 }

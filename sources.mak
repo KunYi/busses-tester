@@ -7,4 +7,4 @@ CPPSRC= \
     lpc17xxhardware.cpp \
     spitester.cpp \
     util.cpp \
-    
+

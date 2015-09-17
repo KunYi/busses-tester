@@ -16,16 +16,16 @@ void SpiTester::Init ()
 {
     SspInit();
     TimerInit();
-    
+
     uint32_t sspClk = GetPeripheralClockFrequency(CLKPWR_PCLKSEL_SSP0);
-    
+
     this->testerInfo.DeviceId = DEVICE_ID;
     this->testerInfo.Version = VERSION;
     this->testerInfo.MaxFrequency = std::min(uint32_t(5000000), sspClk / 12);
     this->testerInfo.ClockMeasurementFrequency = SystemCoreClock;
     this->testerInfo.MinDataBitLength = MIN_DATA_BIT_LENGTH;
     this->testerInfo.MaxDataBitLength = MAX_DATA_BIT_LENGTH;
-    
+
     printf(
         "sspClk = %lu, Maximum clock rate = %lu\n\r",
         sspClk,
@@ -95,14 +95,14 @@ void SpiTester::SspSetDataMode (SpiDataMode Mode, uint32_t DataBitLength)
 void SpiTester::SspSendWithChecksum (const uint8_t* Data, uint32_t LengthInBytes)
 {
     __disable_irq();
-    
+
     for (const uint8_t* data = Data; data != (Data + LengthInBytes); ) {
         if (LPC_SSP0->SR & SSP_SR_TNF) {
             LPC_SSP0->DR = *data;
             ++data;
         }
     }
-    
+
     uint32_t checksum = Crc16().Update(Data, LengthInBytes);
     for (size_t i = 0; i < sizeof(uint16_t); ) {
         if (LPC_SSP0->SR & SSP_SR_TNF) {
@@ -110,14 +110,14 @@ void SpiTester::SspSendWithChecksum (const uint8_t* Data, uint32_t LengthInBytes
             ++i;
         }
     }
-    
+
     __enable_irq();
-    
+
     WaitForCsToDeassert();
 }
 
 void SpiTester::WaitForCsToDeassert ()
-{    
+{
     while (ChipSelectAsserted() || (LPC_SSP0->SR & SSP_SR_RNE))
         dummy = LPC_SSP0->DR;
 }
@@ -155,7 +155,7 @@ ClockMeasurementStatus SpiTester::WaitForCapture (uint32_t* Capture)
 {
     // wait for first capture or first byte to be received
     uint32_t capture;
-    
+
     while (!(LPC_SSP0->SR & SSP_SR_RNE)) {
         if ((capture = LPC_TIM2->CR0) != 0) break;
         if ((capture = LPC_TIM2->CR0) != 0) break;
@@ -169,12 +169,12 @@ ClockMeasurementStatus SpiTester::WaitForCapture (uint32_t* Capture)
         if ((capture = LPC_TIM2->CR0) != 0) break;
         if ((capture = LPC_TIM2->CR0) != 0) break;
     }
-    
+
     if (capture != 0) {
         *Capture = capture;
         return ClockMeasurementStatus::Success;
     }
-    
+
     return ClockMeasurementStatus::EdgeNotDetected;
 }
 
@@ -186,7 +186,7 @@ TransferInfo SpiTester::CaptureTransfer (const CommandBlock& Command)
         // Command.u.CaptureNextTransfer.DataBitLength);
 
     auto transferInfo = TransferInfo();
-        
+
     uint32_t checksum = 0;
     const uint32_t dataMask = (1 << Command.u.CaptureNextTransfer.DataBitLength) - 1;
     // This is the value we should expect to receive from the master
@@ -201,21 +201,21 @@ TransferInfo SpiTester::CaptureTransfer (const CommandBlock& Command)
 
     // Reset timer
     LPC_TIM2->TCR = TIM_TCR_RESET;
-        
+
     __disable_irq();
-    
+
     // do initial fill of TX fifo
     for (int i = 0; i < 8; ++i) {
         LPC_SSP0->DR = txValue & dataMask;
         ++txValue;
     }
-    
+
     // Wait for CS to assert
     while (!ChipSelectAsserted());
-    
+
     // start timer
     LPC_TIM2->TCR = TIM_TCR_ENABLE;
-    
+
     uint32_t capture1;
     transferInfo.ClockActiveTimeStatus = WaitForCapture(&capture1);
 
@@ -225,7 +225,7 @@ TransferInfo SpiTester::CaptureTransfer (const CommandBlock& Command)
 
         if (status & SSP_SR_RNE) {
             uint32_t data = LPC_SSP0->DR;
-            
+
             //add to checksum
             checksum = crc16_update(checksum, uint8_t(data));
             // checksum.Update(uint8_t(data));
@@ -235,7 +235,7 @@ TransferInfo SpiTester::CaptureTransfer (const CommandBlock& Command)
 
             if ((data != (rxValue & dataMask)) && !mismatchDetected) {
                 mismatchDetected = true;
-                transferInfo.MismatchIndex = 
+                transferInfo.MismatchIndex =
                     rxValue - Command.u.CaptureNextTransfer.SendValue;
                 // printf(
                     // "Mismatch detected! (rxValue = %d, data = 0x%x)\n\r",
@@ -248,25 +248,25 @@ TransferInfo SpiTester::CaptureTransfer (const CommandBlock& Command)
             // has been purged
             break;
         }
-        
+
         // space available in TX FIFO?
         if (status & SSP_SR_TNF) {
             LPC_SSP0->DR = txValue & dataMask;
             ++txValue;
         }
     }
-    
+
     __enable_irq();
-    
+
     if (transferInfo.ClockActiveTimeStatus == ClockMeasurementStatus::Success) {
         // did timer overflow?
         if (!(LPC_TIM2->TCR & TIM_TCR_ENABLE)) {
             transferInfo.ClockActiveTimeStatus = ClockMeasurementStatus::Overflow;
         } else {
-            // measurement was captured successfully        
+            // measurement was captured successfully
             uint32_t capture2 = LPC_TIM2->CR0;
             LPC_TIM2->TCR = TIM_TCR_RESET;
-            
+
             transferInfo.ClockActiveTime = capture2 - capture1;
             // printf(
                 // "Time measured successfully. capture = %lu, capture2 = %lu, activeTime = %lu, clockActiveTime = %lu\n\r",
@@ -276,14 +276,14 @@ TransferInfo SpiTester::CaptureTransfer (const CommandBlock& Command)
                 // clockActiveTime);
         }
     }
-    
+
     // printf("data = 0x%x\n\r", data);
-    
+
     transferInfo.Checksum = checksum;
     transferInfo.ElementCount = rxValue - Command.u.CaptureNextTransfer.SendValue;
     if (!mismatchDetected)
         transferInfo.MismatchIndex = transferInfo.ElementCount;
-    
+
     // printf(
         // "transferInfo.ElementCount = %d, rxValue = %d\n\r",
         // transferInfo.ElementCount,
@@ -291,7 +291,7 @@ TransferInfo SpiTester::CaptureTransfer (const CommandBlock& Command)
     SspSetDataMode(
         SPI_CONTROL_INTERFACE_MODE,
         SPI_CONTROL_INTERFACE_DATABITLENGTH);
-        
+
     return transferInfo;
 }
 
@@ -300,7 +300,7 @@ bool SpiTester::ReceiveCommand (CommandBlock& Command)
 {
     // is there any data waiting for us?
     if (!(LPC_SSP0->SR & SSP_SR_RNE)) return false;
-    
+
     // receive a command block
     for (size_t i = 0; i < sizeof(Command); ) {
         // byte received?
@@ -335,5 +335,5 @@ void SpiTester::RunStateMachine ()
             // printf("Invalid command: 0x%x\n\r", command);
             break;
         }
-    }    
+    }
 }

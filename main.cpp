@@ -15,14 +15,14 @@ Lldt::Spi::SpiTester spiTester;
 int main ()
 {
     SetDefaultTimer(LPC_TIM3);
-    
+
     i2cTester.Init();
     spiTester.Init();
-    
+
     for (;;) {
         i2cTester.RunStateMachine();
         spiTester.RunStateMachine();
     }
-    
+
     return 0;
 }
