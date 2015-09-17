@@ -12,18 +12,52 @@
 #include <stdint.h>
 
 namespace Lldt {
+namespace I2c {
+    
+enum {
+    //
+    // The slave address of the test device
+    //
+    SLAVE_ADDRESS = 0x55,
+    
+    //
+    // Version of the interface. Increment this when a breaking change is made
+    // to the interface.
+    //
+    VERSION = 1,
+    
+    NACK_INDEX_MAX = 0xFE,
+    STRETCH_INDEX_MAX = 0xFE,
+};
+
+enum REGISTERS {
+    EEPROM_ADDRESS_MAX = 0x7F,
+    REG_VERSION = 0xF7,
+    REG_DISABLE_REPEATED_STARTS = 0xF8,
+    REG_SCL_HOLD_MILLIS_HI = 0xF9,
+    REG_SCL_HOLD_MILLIS_LO = 0xFA,
+    REG_HOLD_READ_CONTROL = 0xFB,
+    REG_HOLD_WRITE_CONTROL = 0xFC,
+    REG_NAK_CONTROL = 0xFD,
+    REG_CHECKSUM_UPDATE = 0xFE,
+    REG_CHECKSUM_RESET = 0xFF,
+};
+
+} // namespace I2c    
 namespace Spi {
 
-//
-// Device signature returned in DeviceId field of TesterInfo.
-//
-enum : uint32_t { DEVICE_ID = 0x7B216A38 };
-
-//
-// Version of the interface. Increment this when a breaking change is made
-// to the interface.
-//
-enum : uint32_t { VERSION = 1 };
+enum : uint32_t {
+    //
+    // Device signature returned in DeviceId field of TesterInfo.
+    //
+    DEVICE_ID = 0x7B216A38,
+    
+    //
+    // Version of the interface. Increment this when a breaking change is made
+    // to the interface.
+    //
+    VERSION = 1,
+};
 
 //
 // Commands understood by the tester.

@@ -8,6 +8,9 @@
 #include "Lpc17xxHardware.h"
 #include "util.h"
 
+namespace Lldt {
+namespace I2c {
+
 class I2cTester
 {
 public:
@@ -17,12 +20,14 @@ public:
         address(0),
         countdown(0),
         isFirstByte(false)
-    { }
+    {
+        this->storage[REG_VERSION] = VERSION;
+    }
 
     //
     // Initialize I2C1 in slave mode on P0.0 (SDA) and P0.1 (SCL)
     //
-    static void Init (uint32_t SlaveAddress);
+    static void Init ( );
 
     //
     // Call this in a loop to run the I2C state machine
@@ -30,18 +35,6 @@ public:
     void RunStateMachine ( );
 
 private:
-
-    enum REGISTERS {
-        EEPROM_ADDRESS_MAX = 0x7F,
-        REG_DISABLE_REPEATED_STARTS = 0xF8,
-        REG_SCL_HOLD_MILLIS_HI = 0xF9,
-        REG_SCL_HOLD_MILLIS_LO = 0xFA,
-        REG_HOLD_READ_CONTROL = 0xFB,
-        REG_HOLD_WRITE_CONTROL = 0xFC,
-        REG_NAK_CONTROL = 0xFD,
-        REG_CHECKSUM_UPDATE = 0xFE,
-        REG_CHECKSUM_RESET = 0xFF,
-    };
 
     enum : uint16_t {
         SCL_HOLD_DEFAULT = 15000
@@ -92,5 +85,8 @@ private:
     bool isFirstByte;
     uint8_t storage[256];   // provide 256 bytes of storage in our virtual eeprom
 };
+
+} // namespace I2c
+} // namespace Lldt
 
 #endif // _I2CTESTER_H_

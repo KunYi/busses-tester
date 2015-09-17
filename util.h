@@ -29,10 +29,16 @@ public:
 
     void Reset ( ) { this->crc = 0; }
 
-private:
     static const uint16_t crc16table[];
+    
+private:
 
     uint32_t crc;
 };
+
+inline uint32_t crc16_update (uint32_t crc, uint8_t data)
+{
+    return ((crc << 8) ^ Crc16::crc16table[((crc >> 8) ^ data) & 0xff]) & 0xffff;
+}
 
 #endif // _LLDTESTER_UTIL_H_

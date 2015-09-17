@@ -187,7 +187,7 @@ TransferInfo SpiTester::CaptureTransfer (const CommandBlock& Command)
 
     auto transferInfo = TransferInfo();
         
-    Crc16 checksum;
+    uint32_t checksum = 0;
     const uint32_t dataMask = (1 << Command.u.CaptureNextTransfer.DataBitLength) - 1;
     // This is the value we should expect to receive from the master
     uint32_t rxValue = Command.u.CaptureNextTransfer.SendValue;
@@ -223,19 +223,14 @@ TransferInfo SpiTester::CaptureTransfer (const CommandBlock& Command)
         // byte received?
         uint32_t status = LPC_SSP0->SR;
 
-        // space available in TX FIFO?
-        if (status & SSP_SR_TNF) {
-            LPC_SSP0->DR = txValue & dataMask;
-            ++txValue;
-        }
-        
         if (status & SSP_SR_RNE) {
             uint32_t data = LPC_SSP0->DR;
             
-            // add to checksum
-            checksum.Update(uint8_t(data));
-            if (Command.u.CaptureNextTransfer.DataBitLength > 8) {
-                checksum.Update(uint8_t(data >> 8));
+            //add to checksum
+            checksum = crc16_update(checksum, uint8_t(data));
+            // checksum.Update(uint8_t(data));
+            if (dataMask & (1 << 8)) {
+                checksum = crc16_update(checksum, uint8_t(data >> 8));
             }
 
             if ((data != (rxValue & dataMask)) && !mismatchDetected) {
@@ -252,6 +247,12 @@ TransferInfo SpiTester::CaptureTransfer (const CommandBlock& Command)
             // only check if chip select is deasserted if the receive FIFO
             // has been purged
             break;
+        }
+        
+        // space available in TX FIFO?
+        if (status & SSP_SR_TNF) {
+            LPC_SSP0->DR = txValue & dataMask;
+            ++txValue;
         }
     }
     
@@ -278,7 +279,7 @@ TransferInfo SpiTester::CaptureTransfer (const CommandBlock& Command)
     
     // printf("data = 0x%x\n\r", data);
     
-    transferInfo.Checksum = checksum.Get();
+    transferInfo.Checksum = checksum;
     transferInfo.ElementCount = rxValue - Command.u.CaptureNextTransfer.SendValue;
     if (!mismatchDetected)
         transferInfo.MismatchIndex = transferInfo.ElementCount;

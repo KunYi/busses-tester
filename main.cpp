@@ -5,25 +5,22 @@
 // Windows Devices Low Level HLK tests.
 //
 
-//#include <mbed.h>
-
 #include "lldtester.h"
-
 #include "i2ctester.h"
 #include "spitester.h"
 
-enum : uint32_t { SLAVE_ADDRESS = 0x55 };
-
-I2cTester i2cTester;
+Lldt::I2c::I2cTester i2cTester;
 Lldt::Spi::SpiTester spiTester;
 
 int main ()
 {
-    i2cTester.Init(SLAVE_ADDRESS);
+    SetDefaultTimer(LPC_TIM3);
+    
+    i2cTester.Init();
     spiTester.Init();
     
     for (;;) {
-        //i2cTester.RunStateMachine();
+        i2cTester.RunStateMachine();
         spiTester.RunStateMachine();
     }
     

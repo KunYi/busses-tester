@@ -4,6 +4,9 @@
 #ifndef _LPC17XX_HARDWARE_H_
 #define _LPC17XX_HARDWARE_H_
 
+#include <stdint.h>
+#include <lpc17xx.h>
+
 //
 // Clock and Power
 //
@@ -126,9 +129,6 @@ uint32_t GetPeripheralClockFrequency (CLKPWR_PCLKSEL Peripheral);
 //
 // Timer Related Definitions
 //
-/**********************************************************************
-* Timer control register definitions
-**********************************************************************/
 enum TIM_TCR : uint32_t {
     TIM_TCR_ENABLE			= 1<<0,
     TIM_TCR_RESET			= 1<<1,
@@ -195,6 +195,21 @@ enum TIM_CTCR : uint32_t {
     TIM_CTCR_MASKBIT        = 0xF,
     TIM_CTCR_COUNTER_MODE   = 1,
 };
+
+void SetDefaultTimer (LPC_TIM_TypeDef* Timer);
+uint32_t Micros ();
+void DelayMicros (uint32_t Micros);
+
+inline uint32_t Millis ()
+{
+    return Micros() / 1000;
+}
+
+inline void DelayMillis (uint32_t Millis)
+{
+    DelayMicros(1000U * Millis);
+}
+
 
 //
 // I2C Related Definitions

@@ -1,19 +1,52 @@
 //
 // Copyright (C) Microsoft. All rights reserved.
 //
-#include <mbed.h>
+
+#include "Lpc17xxHardware.h"
+#include "lldtester.h"
 #include "i2ctester.h"
 
-DigitalOut activityLed(LED1);
-DigitalOut errorLed(LED2);
+using namespace Lldt::I2c;
+
+// P1.18
+void ActLedInit ()
+{
+    LPC_GPIO1->FIODIR = 1 << 18;
+}
+
+void ActLedOn ()
+{
+    LPC_GPIO1->FIOSET = 1 << 18;
+}
+
+void ActLedOff ()
+{
+    LPC_GPIO1->FIOCLR = 1 << 18;
+}
+
+// P1.20
+void ErrLedInit ()
+{
+    LPC_GPIO1->FIODIR = 1 << 20;
+}
+
+void ErrLedOn ()
+{
+    LPC_GPIO1->FIOSET = 1 << 20;
+}
+
+void ErrLedOff ()
+{
+    LPC_GPIO1->FIOCLR = 1 << 20;
+}
 
 void FatalError ()
 {
     for (;;) {
-        errorLed = 1;
-        wait_ms(1000);
-        errorLed = 0;
-        wait_ms(1000);
+        ErrLedOn();
+        DelayMillis(1000);
+        ErrLedOff();
+        DelayMillis(1000);
     }
 }
 
@@ -22,22 +55,22 @@ void FatalError ()
 //
 void BlinkDelay ( uint32_t Milliseconds )
 {
-    Timer timer;
-    timer.start();
-
-    int end = timer.read_ms() + Milliseconds;
+    int end = Millis() + Milliseconds;
     int nextToggle = 0;
     uint32_t i = 0;
 
     int now;
-    while ((now = timer.read_ms()) < end) {
+    while ((now = Millis()) < end) {
         if (now >= nextToggle) {
-            activityLed = ++i & 1;
+            if (++i & 1)
+                ActLedOn();
+            else
+                ActLedOff();
             nextToggle += 500;
         }
     }
 
-    activityLed = 0;
+    ActLedOff();
 }
 
 void I2cTester::DelayCurrentHoldMillis ( )
@@ -51,14 +84,28 @@ void I2cTester::DelayCurrentHoldMillis ( )
 //
 // Initialize I2C1 in slave mode on P0.0 (SDA) and P0.1 (SCL)
 //
-void I2cTester::Init (uint32_t SlaveAddress)
+void I2cTester::Init ( )
 {
-    i2c_t device = { LPC_I2C1 };
-    i2c_init(&device, P0_0, P0_1);
-    i2c_frequency(&device, 100000);
+    SetPeripheralPowerState(CLKPWR_PCONP_PCI2C1, true);
+    SetPeripheralClockDivider(CLKPWR_PCLKSEL_I2C1, CLKPWR_PCLKSEL_CCLK_DIV_4);
+
+    // P0.1 (SCL), P0.0 (SDA)
+    LPC_PINCON->PINSEL0 = LPC_PINCON->PINSEL0 | (0x3 << 2) | (0x3 << 0);
+
+    // Select neither pull-up nor pull-down for P0.1, P0.0
+    LPC_PINCON->PINMODE0 =
+        (LPC_PINCON->PINMODE0 & ~((0x3 << 2) | (0x3 << 0))) |
+        (0x2 << 2) | (0x2 << 0);
+
+    // Select open drain mode for P0.1, P0.0
+    LPC_PINCON->PINMODE_OD0 |= (1 << 1) | (1 << 0);
+
+    // Set clock rate of 100kHz
+    LPC_I2C1->I2SCLL = LPC_I2C1->I2SCLH =
+        GetPeripheralClockFrequency(CLKPWR_PCLKSEL_I2C1) / 100000 / 2;
 
     LPC_I2C1->I2CONCLR = I2C_I2CONCLR_I2ENC;
-    LPC_I2C1->I2ADR0 = SlaveAddress << 1;
+    LPC_I2C1->I2ADR0 = SLAVE_ADDRESS << 1;
     LPC_I2C1->I2MASK0 = 0;
 
     LPC_I2C1->I2CONCLR = I2C_I2CONCLR_STAC | I2C_I2CONCLR_STOC | I2C_I2CONCLR_SIC;
@@ -88,16 +135,16 @@ void I2cTester::RunStateMachine ( )
     case I2C_I2STAT_S_RX_GENCALL_ACK:           // addressed generally, returned ack
     case I2C_I2STAT_S_RX_ARB_LOST_M_SLA:        // lost arbitration, returned ack
     case I2C_I2STAT_S_RX_ARB_LOST_M_GENCALL:    // lost arbitration, returned ack
-        activityLed = 1;
+        ActLedOn();
         this->AddressedForWrite();
         break;
     case I2C_I2STAT_S_RX_PRE_SLA_DAT_ACK:       // data received, returned ack
     case I2C_I2STAT_S_RX_PRE_GENCALL_DAT_ACK:   // data received generally, returned ack
-        activityLed = 1;
+        ActLedOn();
         this->ByteReceived(LPC_I2C1->I2DAT);
         break;
     case I2C_I2STAT_S_RX_STA_STO_SLVREC_SLVTRX: // stop or repeated start condition received
-        activityLed = 1;
+        ActLedOn();
         this->StopReceived();
         this->ReleaseBus();
         break;
@@ -112,11 +159,11 @@ void I2cTester::RunStateMachine ( )
     case I2C_I2STAT_S_TX_SLAR_ACK:              // addressed, returned ack
     case I2C_I2STAT_S_TX_ARB_LOST_M_SLA:        // arbitration lost, returned ack
         this->ByteRequested(true);
-        activityLed = 1;
+        ActLedOn();
         break;
     case I2C_I2STAT_S_TX_DAT_ACK:               // byte sent, ack returned
         this->ByteRequested(false);
-        activityLed = 1;
+        ActLedOn();
         break;
     case I2C_I2STAT_S_TX_DAT_NACK:              // received nack, we are done
         this->Ack();
@@ -133,9 +180,9 @@ void I2cTester::RunStateMachine ( )
     case I2C_I2STAT_NO_INF:                     // no state information
     default:
         break;
-  }
+    }
 
-  activityLed = 0;
+    ActLedOff();
 }
 
 void I2cTester::AddressedForWrite ( )
