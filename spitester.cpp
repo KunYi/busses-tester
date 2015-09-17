@@ -1,11 +1,14 @@
 //
 // Copyright (C) Microsoft. All rights reserved.
 //
+#include <stdint.h>
 #include <stdio.h>
 #include <algorithm>
 #include <lpc17xx.h>
-#include "Lpc17xxHardware.h"
+
+#include "lldtester.h"
 #include "util.h"
+#include "Lpc17xxHardware.h"
 #include "spitester.h"
 
 using namespace Lldt::Spi;

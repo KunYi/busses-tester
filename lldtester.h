@@ -9,8 +9,6 @@
 #ifndef _LLDTESTER_H_
 #define _LLDTESTER_H_
 
-#include <stdint.h>
-
 namespace Lldt {
 namespace I2c {
 

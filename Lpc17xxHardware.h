@@ -4,9 +4,6 @@
 #ifndef _LPC17XX_HARDWARE_H_
 #define _LPC17XX_HARDWARE_H_
 
-#include <stdint.h>
-#include <lpc17xx.h>
-
 //
 // Clock and Power
 //

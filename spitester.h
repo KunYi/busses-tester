@@ -4,9 +4,6 @@
 #ifndef _SPITESTER_H_
 #define _SPITESTER_H_
 
-#include <stdint.h>
-#include "lldtester.h"
-
 namespace Lldt {
 namespace Spi {
 

@@ -1,6 +1,8 @@
 //
 // Copyright (C) Microsoft. All rights reserved.
 //
+#include <stdint.h>
+#include <lpc17xx.h>
 
 #include "Lpc17xxHardware.h"
 #include "lldtester.h"

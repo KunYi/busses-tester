@@ -1,7 +1,8 @@
+//
+// Copyright (C) Microsoft. All rights reserved.
+//
 #ifndef _LLDTESTER_UTIL_H_
 #define _LLDTESTER_UTIL_H_
-
-#include <stdint.h>
 
 class Crc16
 {

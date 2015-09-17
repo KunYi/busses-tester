@@ -4,7 +4,9 @@
 // busses-tester: Firmware for the mbed LPC1768 that complements the
 // Windows Devices Low Level HLK tests.
 //
-
+#include <stdint.h>
+#include <lpc17xx.h>
+    
 #include "lldtester.h"
 #include "i2ctester.h"
 #include "spitester.h"
