@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <lpc17xx.h>
 
+#include "util.h"
 #include "Lpc17xxHardware.h"
 #include "lldtester.h"
 #include "i2ctester.h"

@@ -4,10 +4,6 @@
 #ifndef _I2CTESTER_H_
 #define _I2CTESTER_H_
 
-#include <lpc17xx.h>
-#include "Lpc17xxHardware.h"
-#include "util.h"
-
 namespace Lldt {
 namespace I2c {
 
