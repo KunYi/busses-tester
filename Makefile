@@ -52,10 +52,10 @@ LDFLAGS= \
     -Wl,--wrap,main \
 
 LDSCRIPT=$(MBED_ROOT)/TARGET_LPC1768/TOOLCHAIN_GCC_ARM/LPC1768.ld
-LIBRARY_PATHS= -L$(MBED_ROOT)/TARGET_LPC1768/TOOLCHAIN_GCC_ARM 
+LIBRARY_PATHS= -L$(MBED_ROOT)/TARGET_LPC1768/TOOLCHAIN_GCC_ARM
 
 # default optimization, overridable in sources.inc files
-OPT= -Os
+OPT= -O2
 
 CDEFINES= \
     -DTARGET_LPC1768 \
@@ -70,7 +70,7 @@ CDEFINES= \
     -DARM_MATH_CM3 \
     -DMBED_BUILD_TIMESTAMP=1439405352.85 \
     -D__MBED__=1 \
-    
+
 CINCS= \
     -I$(MBED_ROOT) \
     -I$(MBED_ROOT)/TARGET_LPC1768 \
@@ -125,7 +125,7 @@ $(TARGETNAME).a: $(OBJ)
     @echo.
     @echo Creating BIN
     $(OBJCOPY) -O binary $< $@
-    
+
 .elf.hex:
     @echo.
     @echo Creating HEX
