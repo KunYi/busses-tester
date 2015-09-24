@@ -98,10 +98,10 @@ void I2cTester::Init ( )
     // P0.1 (SCL), P0.0 (SDA)
     LPC_PINCON->PINSEL0 = LPC_PINCON->PINSEL0 | (0x3 << 2) | (0x3 << 0);
 
-    // Select neither pull-up nor pull-down for P0.1, P0.0
+    // Select pull-up for P0.1, P0.0
     LPC_PINCON->PINMODE0 =
-        (LPC_PINCON->PINMODE0 & ~((0x3 << 2) | (0x3 << 0))) |
-        (0x2 << 2) | (0x2 << 0);
+        (LPC_PINCON->PINMODE0 & ~((0x3 << 2) | (0x3 << 0))) | 
+        (0 << 2) | (0 << 0);
 
     // Select open drain mode for P0.1, P0.0
     LPC_PINCON->PINMODE_OD0 |= (1 << 1) | (1 << 0);
