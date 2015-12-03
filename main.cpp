@@ -13,12 +13,14 @@
 #include "i2ctester.h"
 #include "spitester.h"
 
-Lldt::I2c::I2cTester i2cTester;
-Lldt::Spi::SpiTester spiTester;
-
 int main ()
 {
+    ActLedInit();
+    ErrLedInit();
     SetDefaultTimer(LPC_TIM3);
+    
+    Lldt::I2c::I2cTester i2cTester;
+    Lldt::Spi::SpiTester spiTester;
 
     i2cTester.Init();
     spiTester.Init();

@@ -2,6 +2,7 @@
 // Copyright (C) Microsoft. All rights reserved.
 //
 #include <stdint.h>
+#include <lpc17xx.h>
 #include "util.h"
 
 // CRC16 table for CCITT polynomial (0x1021)
