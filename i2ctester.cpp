@@ -2,6 +2,8 @@
 // Copyright (C) Microsoft. All rights reserved.
 //
 #include <stdint.h>
+#include <stdio.h>
+#include <string.h>
 #include <lpc17xx.h>
 
 #include "util.h"
@@ -11,41 +13,10 @@
 
 using namespace Lldt::I2c;
 
-// P1.18
-void ActLedInit ()
-{
-    LPC_GPIO1->FIODIR |= 1 << 18;
-}
-
-void ActLedOn ()
-{
-    LPC_GPIO1->FIOSET = 1 << 18;
-}
-
-void ActLedOff ()
-{
-    LPC_GPIO1->FIOCLR = 1 << 18;
-}
-
-// P1.20
-void ErrLedInit ()
-{
-    LPC_GPIO1->FIODIR |= 1 << 20;
-}
-
-void ErrLedOn ()
-{
-    LPC_GPIO1->FIOSET = 1 << 20;
-}
-
-void ErrLedOff ()
-{
-    LPC_GPIO1->FIOCLR = 1 << 20;
-}
-
 void FatalError ()
 {
     for (;;) {
+        DBGPRINT("Fatal error!\n\r");
         ErrLedOn();
         DelayMillis(1000);
         ErrLedOff();
@@ -81,6 +52,7 @@ void I2cTester::DelayCurrentHoldMillis ( )
     uint32_t timeInMillis =
         (storage[REG_SCL_HOLD_MILLIS_HI] << 8) |
         storage[REG_SCL_HOLD_MILLIS_LO];
+    DBGPRINT("DelayCurrentHoldMillis for %lu ms\n\r", timeInMillis);
     BlinkDelay(timeInMillis);
 }
 
@@ -89,9 +61,22 @@ void I2cTester::DelayCurrentHoldMillis ( )
 //
 void I2cTester::Init ( )
 {
-    ActLedInit();
-    ErrLedInit();
-
+    this->state = STATE_NORMAL;
+    this->address = 0;
+    this->countdown = 0;
+    this->isFirstByte = false;
+    
+    memset(this->storage, sizeof(this->storage), 0);
+    this->storage[REG_VERSION] = VERSION;
+    this->storage[REG_DISABLE_REPEATED_STARTS] = 0;
+    this->storage[REG_SCL_HOLD_MILLIS_HI] = 0x01;
+    this->storage[REG_SCL_HOLD_MILLIS_LO] = 0xF4;
+    this->storage[REG_HOLD_READ_CONTROL] = 0xff;
+    this->storage[REG_HOLD_WRITE_CONTROL] = 0xff;
+    this->storage[REG_NAK_CONTROL] = 0xff;
+    this->storage[REG_CHECKSUM_UPDATE] = 0;
+    this->storage[REG_CHECKSUM_RESET] = 0;
+    
     SetPeripheralPowerState(CLKPWR_PCONP_PCI2C1, true);
     SetPeripheralClockDivider(CLKPWR_PCLKSEL_I2C1, CLKPWR_PCLKSEL_CCLK_DIV_4);
 
@@ -100,7 +85,7 @@ void I2cTester::Init ( )
 
     // Select pull-up for P0.1, P0.0
     LPC_PINCON->PINMODE0 =
-        (LPC_PINCON->PINMODE0 & ~((0x3 << 2) | (0x3 << 0))) | 
+        (LPC_PINCON->PINMODE0 & ~((0x3 << 2) | (0x3 << 0))) |
         (0 << 2) | (0 << 0);
 
     // Select open drain mode for P0.1, P0.0

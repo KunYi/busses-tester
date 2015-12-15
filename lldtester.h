@@ -9,6 +9,9 @@
 #ifndef _LLDTESTER_H_
 #define _LLDTESTER_H_
 
+#include <cstdint>
+#include <climits>
+
 namespace Lldt {
 namespace I2c {
 
@@ -54,7 +57,7 @@ enum : uint32_t {
     // Version of the interface. Increment this when a breaking change is made
     // to the interface.
     //
-    VERSION = 1,
+    VERSION = 2,
 };
 
 //
@@ -65,6 +68,9 @@ enum SpiTesterCommand {
     GetDeviceInfo = 0x81,
     CaptureNextTransfer,
     GetTransferInfo,
+    StartPeriodicInterrupts,
+    AcknowledgeInterrupt,
+    GetPeriodicInterruptInfo,
 };
 
 //
@@ -87,6 +93,8 @@ enum SpiDataMode {
     Mode3,
 };
 
+enum : uint32_t { INVALID_TIME_SINCE_FALLING_EDGE = 0xffffffffUL };
+
 //
 // SPI connection settings to use for communicating with the SPI tester
 // control interface.
@@ -98,9 +106,30 @@ const uint32_t SPI_CONTROL_INTERFACE_DATABITLENGTH = 8;
 #pragma pack(push,1)
 
 //
+// This structure is prepended to all SPI transactions from the test device
+// to the master (that is, when the master does a READ operation). This
+// structure contains information that the master can use to verify that the
+// payload received from the slave device is valid.
+//
+struct TransferHeader {
+    struct {
+        //
+        // The CRC16 of all bytes in the transfer, including this header, with
+        // this field zeroed out.
+        //
+        uint16_t Checksum;
+
+        //
+        // The total length of the transfer including this header.
+        //
+        uint16_t Length;
+    } Header;
+};
+
+//
 // Describes the test device's capabilities.
 //
-struct TesterInfo {
+struct TesterInfo : public TransferHeader {
     //
     // Signature of the test device (DEVICE_ID).
     //
@@ -136,7 +165,7 @@ struct TesterInfo {
 //
 // Contains information about a captured transfer.
 //
-struct TransferInfo {
+struct TransferInfo : public TransferHeader {
     //
     // The CRC16 of all bytes received by the tester in capture mode.
     //
@@ -154,7 +183,8 @@ struct TransferInfo {
     uint32_t MismatchIndex;
 
     //
-    // Status code indicating if the clock active time was successfully measured.
+    // Status code indicating if the clock active time was successfully
+    // measured.
     //
     ClockMeasurementStatus ClockActiveTimeStatus;
 
@@ -165,6 +195,156 @@ struct TransferInfo {
     //
     uint32_t ClockActiveTime;
 
+};
+
+//
+// Bitfield structure indicating possible errors that can occur in
+// periodic interrupt mode.
+//
+union PeriodicInterruptStatus {
+    struct {
+        //
+        // An invalid command was received while in periodic interrupt mode.
+        // The only command that is valid in periodic interrupt mode is the
+        // AcknowledgeInterrupt command. Any other command will cause
+        // an exit from periodic interrupt mode.
+        //
+        uint32_t NotAcknowledged : 1;
+
+        //
+        // The chip select line was deasserted before the entire
+        // AcknowledgeInterrupt command could be received. This error will
+        // cause periodic interrupt mode to be exited.
+        //
+        uint32_t IncompleteReceive : 1;
+
+        //
+        // The chip select line was deasserted before all response data to the
+        // AcknowledgeInterrupt command could be sent. This error will not
+        // cause periodic interrupt to be exited.
+        //
+        uint32_t IncompleteTransmit : 1;
+
+        //
+        // The transmit FIFO could not be serviced in time while transmitting
+        // data, meaning that data read by the master is likely invalid. This
+        // error does not cause an exit from periodic interrupt mode.
+        //
+        uint32_t TransmitUnderrun : 1;
+
+        //
+        // The specified duration and frequency would result in a total number
+        // of interrupts that would exceed the range of a uint32_t. Use a lower
+        // frequency or duration.
+        //
+        uint32_t ArithmeticOverflow : 1;
+
+        uint32_t reserved : 27;
+    } s;
+    uint32_t AsUInt32;
+};
+
+static_assert(
+    sizeof(PeriodicInterruptStatus) == sizeof(uint32_t),
+    "Verifying size of PeriodicInterruptStatus bitfield");
+
+//
+// Output of the AcknowledgeInterrupt command.
+// The AcknowledgeInterrupt command should be sent as a write-read command,
+// where the write portion of the transfer is a CommandBlock, and the
+// read portion of the transfer is an AcknowledgeInterruptInfo structure.
+//
+struct AcknowledgeInterruptInfo  {
+    //
+    // The number of ticks (in units of ClockMeasurementFrequency ticks per
+    // second) that elapsed since the interrupt pin was asserted to the first
+    // falling edge of SCK since the interrupt. If TimeSinceFallingEdge is
+    // INVALID_TIME_SINCE_FALLING_EDGE it means the interrupt was already
+    // acknowledged, and the latency calculation would be invalid.
+    //
+    uint32_t TimeSinceFallingEdge;
+
+    //
+    // This will be set to the bitwise NOT of TimeSinceFallingEdge.
+    //
+    uint32_t Checksum;
+
+    //
+    // Returns true if checksum validation succeeds.
+    //
+    bool ChecksumValid ( ) const
+    {
+        return this->TimeSinceFallingEdge == ~this->Checksum;
+    }
+
+    //
+    // Returns true if the interrupt was already acknowledged. If the
+    // interrupt was already acknowledged, the latency calculation is not valid
+    // and TimeSinceFallingEdge should be ignored.
+    //
+    bool AlreadyAcknowledged ( ) const
+    {
+        return this->TimeSinceFallingEdge == INVALID_TIME_SINCE_FALLING_EDGE;
+    }
+};
+
+//
+// Output of the GetPeriodicInterruptInfo command. This command should be sent
+// after exiting periodic interrupt mode to retrieve statistics about the
+// just-ended periodic interrupt session.
+//
+struct PeriodicInterruptInfo : public TransferHeader {
+    //
+    // Indicates any errors that occurred while in periodic interrupt mode.
+    // This status is cumulative and will contain all errors that occurred
+    // during periodic interrupt mode.
+    //
+    PeriodicInterruptStatus Status;
+
+    //
+    // Total number of interrupt events that occurred during periodic interrupt
+    // mode. This number does not necessarily equal the number of falling edges
+    // generated; there may be fewer falling edges than total interrupts if
+    // an interrupt was not acknowledged in time.
+    //
+    uint32_t InterruptCount;
+
+    //
+    // The number of interrupts that were acknowledged before the next
+    // interrupt was generated.
+    //
+    uint32_t AcknowledgedBeforeDeadlineCount;
+
+    //
+    // The number of interrupts that were acknowledged after the next interrupt
+    // was generated.
+    //
+    uint32_t AcknowledgedAfterDeadlineCount;
+
+    //
+    // The number of times an acknowledgement was received for an interrupt
+    // that had already been acknowledged.
+    //
+    uint32_t AlreadyAcknowledgedCount;
+
+    //
+    // The number of interrupts that were dropped. This would correspond
+    // to the number of dropped samples for an A/D converter.
+    //
+    uint32_t DroppedInterruptCount ( ) const
+    {
+        return this->InterruptCount - this->AcknowledgedBeforeDeadlineCount -
+            this->AcknowledgedAfterDeadlineCount;
+    }
+
+    //
+    // The total number of successful acknowledgements received.
+    //
+    uint32_t TotalAcknowledgeCount ( ) const
+    {
+        return this->AcknowledgedBeforeDeadlineCount +
+            this->AcknowledgedAfterDeadlineCount;
+    }
 };
 
 //
@@ -193,6 +373,39 @@ struct CommandBlock {
             //
             uint16_t ReceiveValue;
         } CaptureNextTransfer;
+
+        struct {
+            //
+            // The rate at which to generate interrupts. A falling edge will
+            // be produced on the interrupt pin this many times per second.
+            //
+            uint32_t InterruptFrequency;
+
+            //
+            // How long to generate interrupts in seconds. The total number of
+            // interrupts generated will be
+            // InterruptFrequency * DurationInSeconds
+            //
+            uint16_t DurationInSeconds;
+
+            //
+            // Computes the total number of interrupts that will be generated
+            // into the output parameter, and returns true if the calculation
+            // is valid. If false is returned, an arithmetic overflow has
+            // occurred and InterruptFrequency or DurationInSeconds needs
+            // to be reduced.
+            //
+            bool ComputeInterruptCount (uint32_t& InterruptCount) const
+            {
+                uint64_t count64 = uint64_t(this->InterruptFrequency) *
+                    this->DurationInSeconds;
+                InterruptCount = static_cast<uint32_t>(count64);
+
+                // Cannot use std::numeric_limits<uint32_t>::max() since
+                // 'max' collides with a macro on Windows
+                return count64 <= ULONG_MAX;
+            }
+        } StartPeriodicInterrupts;
 
         uint8_t RawBytes[7];
     } u;

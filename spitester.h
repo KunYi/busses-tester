@@ -23,12 +23,17 @@ private:
 
     static void SspSetDataMode (SpiDataMode Mode, uint32_t DataBitLength);
 
-    static void SspSendWithChecksum (const uint8_t* Data, uint32_t LengthInBytes);
+    static void SspSendImpl (TransferHeader& Data);
 
-    template <typename T>
-    static void SspSendWithChecksum (const T& Data)
+    template <typename Ty>
+    static void SspSendWithChecksum (Ty& Data)
     {
-        SspSendWithChecksum(reinterpret_cast<const uint8_t*>(&Data), sizeof(Data));
+        static_assert(
+            __is_base_of(TransferHeader, Ty),
+            "Invalid cast: Ty does not derive from TransferHeader");
+
+        Data.Header.Length = sizeof(Data);
+        SspSendImpl(Data);
     }
 
     static bool ChipSelectAsserted ()
@@ -48,8 +53,14 @@ private:
 
     static uint32_t dummy;
 
+    PeriodicInterruptInfo RunPeriodicInterrupts (const CommandBlock& Command);
+
     TesterInfo testerInfo;
     TransferInfo transferInfo;
+    PeriodicInterruptInfo interruptInfo;
+
+public:
+    static volatile uint32_t remainingInterrupts;
 };
 
 } // namespace Spi

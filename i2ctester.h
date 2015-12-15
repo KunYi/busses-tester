@@ -16,14 +16,12 @@ public:
         address(0),
         countdown(0),
         isFirstByte(false)
-    {
-        this->storage[REG_VERSION] = VERSION;
-    }
+    { }
 
     //
     // Initialize I2C1 in slave mode on P0.0 (SDA) and P0.1 (SCL)
     //
-    static void Init ( );
+    void Init ( );
 
     //
     // Call this in a loop to run the I2C state machine

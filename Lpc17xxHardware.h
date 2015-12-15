@@ -133,6 +133,13 @@ enum TIM_TCR : uint32_t {
 };
 
 //
+// Mask of valid bits in Timer Interrupt Registers
+//
+enum TIM_IR : uint32_t {
+    TIM_IR_MASK = 0x3f,
+};
+
+//
 // Timer MCR Register Bit Definitions
 //
 enum TIM_MATCH_CHANNEL {
@@ -157,6 +164,26 @@ constexpr inline uint32_t TIM_MCR_STOP_ON_MATCH (TIM_MATCH_CHANNEL Channel)
     return 1U << ((Channel * 3) + 2);
 }
 
+constexpr inline uint32_t TIM_EMR_LOW_ON_MATCH (TIM_MATCH_CHANNEL Channel)
+{
+    return 1U << (4 + Channel * 2);
+}
+
+constexpr inline uint32_t TIM_EMR_HIGH_ON_MATCH (TIM_MATCH_CHANNEL Channel)
+{
+    return 2U << (4 + Channel * 2);
+}
+
+constexpr inline uint32_t TIM_EMR_TOGGLE_ON_MATCH (TIM_MATCH_CHANNEL Channel)
+{
+    return 3U << (4 + Channel * 2);
+}
+
+constexpr inline uint32_t TIM_IR_MATCH_FLAG (TIM_MATCH_CHANNEL Channel)
+{
+    return 1U << Channel;
+}
+
 //
 // Timer CCR Register Bit Definitions
 //
@@ -164,8 +191,6 @@ constexpr inline uint32_t TIM_MCR_STOP_ON_MATCH (TIM_MATCH_CHANNEL Channel)
 enum TIM_CAPTURE_CHANNEL {
     TIM_CAPTURE_CHANNEL_0,
     TIM_CAPTURE_CHANNEL_1,
-    TIM_CAPTURE_CHANNEL_2,
-    TIM_CAPTURE_CHANNEL_3,
 };
 
 constexpr inline uint32_t TIM_CCR_RISING (TIM_CAPTURE_CHANNEL Channel)
@@ -181,6 +206,11 @@ constexpr inline uint32_t TIM_CCR_FALLING (TIM_CAPTURE_CHANNEL Channel)
 constexpr inline uint32_t TIM_CCR_INT_ON_CAP (TIM_CAPTURE_CHANNEL Channel)
 {
     return 1U << ((Channel * 3) + 2);
+}
+
+constexpr inline uint32_t TIM_IR_CAPTURE_FLAG (TIM_CAPTURE_CHANNEL Channel)
+{
+    return 1U << (4 + Channel);
 }
 
 //
