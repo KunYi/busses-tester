@@ -3,6 +3,8 @@ Busses-tester: Test device for I2C/SPI master interfaces
 
 This repository contains mbed LPC1768 firmware that enables functional testing of I2C and SPI mater interfaces. This device is used by the Windows.Devices.I2c and Windows.Devices.Spi Hardware Lab Kit (HLK) tests. The HLK comes with a prebuilt binary of this firmware image.  
 
+This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
+
 # Building the code
 
  1. Clone this repository
